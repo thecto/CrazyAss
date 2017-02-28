@@ -18,6 +18,7 @@ linux上需要执行的命令：
 
 需要安装的程序：
     sshpass
+    strace
 
 
 
@@ -30,3 +31,15 @@ linux上需要执行的命令：
     Password:Chen1234
     welcome login...
 
+
+使用strace捕获用户输入的命令：
+sudo strace -f -p 2095 -ttt -o xx.log
+    -f:跟踪-p后面的当前程序，以及其创建的子程序的系统调用，一般与-p结合使用
+    -p:pid
+    -o:将跟踪到的系统调用输出到文件中，默认输出到屏幕上
+    -ttt:以毫秒形式显示时间戳
+
+编译openssh-server，给其添加增加一个选项：
+    sudo apt-get install zlib1g
+    sudo apt-get install zlib1g-dev
+    sudo apt-get install libssl-dev
