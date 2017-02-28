@@ -15,4 +15,8 @@
         # for crazyass only
         python3.5 CrazyAss/user_enterpoint.py
         lougout
-	**Todo**    
+
+### TODO
+    输入审计
+    批量命令输入/文件上传下载
+    前端可视化
