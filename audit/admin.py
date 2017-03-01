@@ -85,9 +85,13 @@ class UserProfileAdmin(BaseUserAdmin):
 class HostUserAdmin(admin.ModelAdmin):
     list_display = ('username','auth_type','password')
 
+class SessionLogAdmin(admin.ModelAdmin):
+    list_display = ('id','session_tag','user','bind_host','date')
+
 admin.site.register(models.UserProfile,UserProfileAdmin)
 admin.site.register(models.Host)
 admin.site.register(models.HostGroup)
 admin.site.register(models.HostUser,HostUserAdmin)
 admin.site.register(models.BindHost)
 admin.site.register(models.IDC)
+admin.site.register(models.SessionLog,SessionLogAdmin)

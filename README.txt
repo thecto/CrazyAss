@@ -43,3 +43,28 @@ sudo strace -f -p 2095 -ttt -o xx.log
     sudo apt-get install zlib1g
     sudo apt-get install zlib1g-dev
     sudo apt-get install libssl-dev
+
+    修改ssh.c
+        while ((opt = getopt(ac, av, "1246ab:c:e:fgi:kl:m:no:p:qstvxz:"
+	    "ACD:E:F:GI:J:KL:MNO:PQ:R:S:TVw:W:XYyZ:")) != -1) {
+		switch (opt) {
+            case 'Z':
+            fprintf(stdout,"session_tag: %s\n", optarg);
+            break;
+        }
+
+    sudo chmod +x configure mkinstalldirs
+    ./configure --prefix=/usr/local/openssh7
+    make && sudo make install
+
+修改sudo配置文件，使crazyass用户可以在sudo时不用输入密码
+    sudo vim /etc/sudoers
+        %crazyass ALL=NOPASSWD:ALL #/usr/bin/strace,/usr/bin/python3
+        %crazyass ALL=NOPASSWD:/usr/bin/strace
+
+
+
+测试：
+chen@ubuntu:/home/crazyass/CrazyAss$ sudo runuser -l crazyass -c 'python3.5 CrazyAss/manage.py runserver 0.0.0.0:9000'
+因为启动crazyass时会自动调用那个脚本，就需要在其他用户下执行crazyass 下的程序
+

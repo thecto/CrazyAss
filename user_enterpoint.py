@@ -5,6 +5,7 @@
 import getpass
 import os
 import subprocess
+import hashlib, time
 
 from django.contrib.auth import authenticate  # django验证用户密码
 
@@ -82,14 +83,32 @@ class UserPortal(object):
                                 print("logging host", selected_bindhost)
 
                                 # 第四步：使用SSH原生客户端sshpass登录选中的主机（代码必须运行在windows）
+                                md5_str = hashlib.md5(str(time.time()).encode()).hexdigest()
                                 # login_cmd格式：sshpass -p 123456 ssh root@192.168.31.11 -o "StrictHostKeyChecking no"
-                                login_cmd = 'sshpass -p {password} ssh {user}@{ip_addr} -o "StrictHostKeyChecking no"'.format(
+                                login_cmd = 'sshpass -p {password} /usr/local/openssh7/bin/ssh {user}@{ip_addr} -o "StrictHostKeyChecking no" -Z {md5_str}'.format(
                                     password=selected_bindhost.host_user.password,
                                     user=selected_bindhost.host_user.username,
-                                    ip_addr=selected_bindhost.host.ip_addr)
+                                    ip_addr=selected_bindhost.host.ip_addr,
+                                    md5_str=md5_str)
+
+                                # start session tracker script 调用shell脚本
+                                session_tracker_script = settings.SESSION_TRACKER_SCRIPT
+                                tracker_obj = subprocess.Popen("%s %s" % (session_tracker_script, md5_str),
+                                                               shell=True, stdout=subprocess.PIPE,
+                                                               stderr=subprocess.PIPE,
+                                                               cwd=settings.BASE_DIR)
+
+                                # create session log
+                                models.SessionLog.objects.create(user=self.user, 
+                                                                 bind_host=selected_bindhost,
+                                                                 session_tag=md5_str)
 
                                 ssh_instance = subprocess.run(login_cmd, shell=True)  # 执行命令
                                 print("------------logout---------")
+                                print("session tracker output:",
+                                      tracker_obj.stdout.read().decode(),
+                                      tracker_obj.stderr.read().decode())
+
                         if user_input2 == "b":
                             break
 
@@ -98,6 +117,7 @@ if __name__ == "__main__":
     # 下面三行实现了用户py文件调用django环境
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "CrazyAss.settings")
     import django
+    from django.conf import settings
 
     django.setup()
     from audit import models
